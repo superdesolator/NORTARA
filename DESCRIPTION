@@ -1,0 +1,21 @@
+Package: nortaRA
+Title: An implementation of NORTA approach with bounding RA algorithm
+Version: 1.0.0
+Authors@R: person("Po", "Su", email = "desolator@sjtu.edu.cn",
+    role = c("aut", "cre"))
+Description: The package implements the NORTA approach with bounding RA
+    algorithm for simultaneous generation of random vectors with specified
+    marginals and correlations. The marginals can be arbitrary(continuous
+    or discrete), see the reference paper and the vignette of package
+    for more details.
+URL: https://github.com/superdesolator/nortaRA
+BugReports: https://github.com/superdesolator/nortaRA/issues
+Depends: R (>= 3.1.2)
+License: MIT + file LICENSE
+LazyData: true
+Imports: corpcor(>= 1.6.7), Matrix(>= 1.1-4)
+Suggests: knitr
+VignetteBuilder: knitr
+Packaged: 2014-12-06 11:13:39 UTC; Administrator
+Author: Po Su [aut, cre]
+Maintainer: Po Su <desolator@sjtu.edu.cn>

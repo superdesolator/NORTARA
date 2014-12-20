@@ -1,0 +1,131 @@
+---
+title: "A quick reference to nortaRA"
+author: "Po Su"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+## Who does need the package?
+The package implements the NORTA approach with bounding RA
+algorithm for simultaneous generation of random vectors with specified
+marginals and correlations. The marginals can be arbitrary(continuous
+or discrete), So if you want to generate a data set with specified mariginals
+and correlations to do some research, the package is a good choice.
+
+## Where can i learn more about the details about the algorithm?
+The package is an implementation of NORTA approach with bounding RA algorithm 
+introduced by the following paper:
+Huifen Chen, (2001) Initialization for NORTA: Generation of Random
+Vectors with Specified Marginals and Correlations. INFORMS Journal on
+Computing 13(4):312-331.
+See more details in the above paper.
+    
+## Is the package completely implement the above algorithm?
+NO, the package does some slightly changes according to the paper, e.g. the initial
+sample size be set to 60 not 40, and the random seeds choice go to the third choice not
+the first choice which introduced by Appendix in the above paper. But the practice 
+results of the package showes it work well in a lot of situations.
+   
+## How can i use the package?
+You can see examples in by ?functionname after library(nortaRA).
+Here is a workflow for you to use the package.
+Suppose you want to generate a sample size of 10000, from 4 marginals:
+
+* t       with df = 5
+* normal  with mean = 0, sd = 1
+* poisson with lambda = 3
+* weibull with shape = 1, scale = 1
+
+
+1. Give your marginals(The inverse CDF functions):
+```{r,eval=FALSE}  
+   #exists in basic packages: you can use their names directly or by a new name
+   qt
+   qnorm
+   b <- qpois
+   #or from other packages  : Here you must give it a new name
+   #you can replace the package::functionname on your needs.
+   f <- stats::qweibull
+   invcdfnames <- c("qt","qnorm","qpois","f")
+  #or invcdfnames <- c("qt","qnorm","b","f") but never
+  #invcdfnames <- c("qt","qnorm","qpois","stats::qweibull")
+```
+2. Give the marginals' arguments: 
+```{r,eval=FALSE}
+  #always you can use the following way, the inner lists' names should match the
+  #above functions' arguments names.  
+  paramslists <- list(
+             m1 = list(df = 5 ),
+             m2 = list(mean = 0, sd = 1),
+             m3 = list(lambda = 3),
+             m4 = list(shape = 1, scale = 1)                 
+             )
+  #if you are lazy,e.g. qnorm using the default values, then you can use the following way:
+ paramslists2 <- list(
+             m1 = list(df = 5 ),             
+             m3 = list(lambda = 3),
+             m4 = list(shape = 1, scale = 1)                 
+             )
+ defaultindex <- c(2)
+```
+3.Give the other arguments for bounding RA algorithm:
+```{r,eval=FALSE}
+ #If you are familiar with the bounding RA algorithm, you can set the functions' arguments
+ #on your needs. e.g. let m1 = 80, sigma0 = 0.001 will be ok if you know the smaller 
+ #sigma0  the more time will be costed. But if you don't familiar with it, you'd better  
+ #use the default values
+```
+4.Give the target correlation matrix
+```{r}
+cor_matrix <- matrix(c(1.0,-0.4,0.1,-0.2,-0.4,
+                       1.0,0.8,0.6,0.1,0.8,1.0,
+                       0.5, -0.2,0.6,0.5,1.0
+                       ),4,4)
+```
+5.Generate the wanted samples:
+```{r,eval=TRUE}  
+  f <- stats::qweibull
+  invcdfnames <- c("qt","qnorm","qpois","f")
+  paramslists <- list(
+             m1 = list(df = 5 ),
+             m2 = list(mean = 0, sd = 1),
+             m3 = list(lambda = 3),
+             m4 = list(shape = 1, scale = 1)                 
+             )
+  cor_matrix <- matrix(c(1.0,-0.4,0.1,-0.2,-0.4,
+                       1.0,0.8,0.6,0.1,0.8,1.0,
+                       0.5, -0.2,0.6,0.5,1.0
+                       ),4,4) 
+  cor_matrix
+  res <- nortaRA::gennortaRA(10000,cor_matrix,invcdfnames,paramslists)
+  head(res,5)
+  cor(res)
+  paramslists2 <- list(
+             m1 = list(df = 5 ),             
+             m3 = list(lambda = 3),
+             m4 = list(shape = 1, scale = 1)                 
+             )
+  defaultindex <- c(2)
+  res2 <- nortaRA::gennortaRA(10000,cor_matrix,invcdfnames,paramslists2,defaultindex)
+  head(res2,5)
+  cor(res2)
+```
+## what should i also be careful?
+* You should not use the gennortaRA to generate multivariate normal virables
+  there are a lot of packages can do it. That's mean, you can't ask the gennortaRA
+  to generate samples when you put invcdfnames = c("qnorm","qnorm","qnorm",..)
+* The other important thing is that your input target correlation matrix should be 
+  valid. The gennortaRA function will call checking cor_matrix functions for you.
+  If you want to check yourself, you can use check_input_cormat function.
+* Sometimes, there will be a warning message telling you a nearest positive definite
+  matrix is used, it gives from function BoundingRA, in these cases, the cor(res)
+  may not be very close to the target input correlation matrix. 
+  
+## How can i contact the author if i have problems in using the package?
+   You can send your email to <desolator@sjtu.edu.cn>
+
+
